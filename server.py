@@ -1,31 +1,25 @@
-from flask import Flask, request, jsonify
-import google.generativeai as genai
 import os
+from flask import Flask, request, render_template, jsonify
+import google.generativeai as genai
 
 app = Flask(__name__)
 
-# Load your Gemini API key
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+# Configure Gemini with your Railway environment variable
+genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
+
+# Use Gemini model
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+@app.route("/")
+def index():
+    return render_template("index.html")
 
 @app.route("/rewrite", methods=["POST"])
 def rewrite():
-    data = request.get_json()
-    text = data.get("text", "")
-
-    if not text:
-        return jsonify({"error": "No text provided"}), 400
-
-    try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        response = model.generate_content(f"Rewrite this text to sound more natural and human:\n\n{text}")
-        rewritten = response.text
-        return jsonify({"rewritten": rewritten})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route("/", methods=["GET"])
-def home():
-    return jsonify({"message": "Gemini backend is running!"})
+    text = request.form["text"]
+    response = model.generate_content(f"Rewrite this text in a natural, human-like way:\n{text}")
+    return jsonify({"rewritten_text": response.text})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
