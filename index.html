@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemini Text Rewriter</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f2f4f8; color: #333; padding: 40px; }
+    .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    textarea { width: 100%; min-height: 120px; padding: 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 8px; resize: vertical; }
+    button { background: #2563eb; color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; }
+    button:hover { background: #1e4fd8; }
+    #output { white-space: pre-wrap; margin-top: 20px; padding: 10px; background: #f9fafb; border-radius: 8px; border: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Gemini Text Rewriter</h2>
+    <p>Enter your text below to rewrite it using Google's Gemini API (backend required).</p>
+
+    <label>Input text:</label>
+    <textarea id="inputText" placeholder="Paste text here..."></textarea>
+
+    <button id="rewriteBtn">Rewrite</button>
+
+    <h3>Output:</h3>
+    <div id="output">Your rewritten text will appear here.</div>
+  </div>
+
+  <script>
+    const button = document.getElementById("rewriteBtn");
+    const input = document.getElementById("inputText");
+    const output = document.getElementById("output");
+
+    button.addEventListener("click", async () => {
+      const text = input.value.trim();
+      if (!text) {
+        output.textContent = "Please enter text first.";
+        return;
+      }
+
+      output.textContent = "Rewriting... please wait.";
+
+      try {
+        const res = await fetch("https://your-railway-app.up.railway.app/rewrite", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text })
+        });
+
+        const data = await res.json();
+        output.textContent = data.rewritten || "No output received.";
+      } catch (err) {
+        output.textContent = "Error: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
